@@ -159,6 +159,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "meetup08"
 version = "0.1.0"
 dependencies = [
+ "rand 0.3.17 (registry+https://github.com/rust-lang/crates.io-index)",
  "rocket 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "rocket_codegen 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.18 (registry+https://github.com/rust-lang/crates.io-index)",
