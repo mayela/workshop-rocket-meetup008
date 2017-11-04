@@ -1,0 +1,2 @@
+<!-- https://tera.netlify.com/ -->
+<h1>{% if nombre %}<strong>{{nombre}}</strong>{% endif %} {{frase}}</h1>

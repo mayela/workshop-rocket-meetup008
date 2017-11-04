@@ -1,11 +1,17 @@
-#![feature(plugin)]
+#![feature(plugin, custom_derive)]
 #![plugin(rocket_codegen)]
 
 extern crate rand;
 
 extern crate rocket;
+extern crate rocket_contrib;
+
+#[macro_use]
+extern crate serde_derive;
 
 use rand::Rng;
+use rocket::request::Form;
+use rocket_contrib::Template;
 
 const FRASES: &[&'static str] = &[
     "“La fuerza estará ya contigo… siempre.” (Obi-Wan Kenobi a Luke Skywalker en la Estrella de la Muerte. STAR WARS, episodio IV, Una Nueva Esperanza)",
@@ -21,12 +27,41 @@ fn sacar_frase_aleatoria(frases: &[&'static str]) -> &'static str {
     frases.get(indice).expect("No se pudo obtener una frase")
 }
 
+#[derive(Serialize)]
+struct ContextoPlantilla {
+    frase: String,
+    nombre: Option<String>,
+}
+
 #[get("/")]
-fn index() -> String {
-    let frase = sacar_frase_aleatoria(&FRASES);
-    frase.to_string()
+fn index() -> Template {
+    let contexto = ContextoPlantilla {
+        frase: sacar_frase_aleatoria(&FRASES).to_string(),
+        nombre: None,
+    };
+    Template::render("index", &contexto)
+}
+
+#[derive(FromForm)]
+struct Formulario {
+    nombre: String,
+}
+
+#[post("/", data = "<formulario>")]
+fn index_personalizado(formulario: Form<Formulario>) -> Template {
+    let form = formulario.get();
+    let nombre = form.nombre.clone();
+    let contexto = ContextoPlantilla {
+        frase: sacar_frase_aleatoria(&FRASES).to_string(),
+        nombre: Some(nombre),
+    };
+
+    Template::render("index", &contexto)
 }
 
 fn main() {
-    rocket::ignite().mount("/", routes![index]).launch();
+    rocket::ignite()
+        .mount("/", routes![index, index_personalizado])
+        .attach(Template::fairing())
+        .launch();
 }
