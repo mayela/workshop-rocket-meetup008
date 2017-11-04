@@ -11,7 +11,7 @@ extern crate serde_derive;
 
 use rand::Rng;
 use rocket::request::Form;
-use rocket_contrib::Template;
+use rocket_contrib::{Template, Json};
 
 const FRASES: &[&'static str] = &[
     "“La fuerza estará ya contigo… siempre.” (Obi-Wan Kenobi a Luke Skywalker en la Estrella de la Muerte. STAR WARS, episodio IV, Una Nueva Esperanza)",
@@ -59,9 +59,16 @@ fn index_personalizado(formulario: Form<Formulario>) -> Template {
     Template::render("index", &contexto)
 }
 
+#[get("/frases")]
+fn api_frases() -> Json<&'static [&'static str]> {
+    Json(FRASES)
+}
+
+
 fn main() {
     rocket::ignite()
         .mount("/", routes![index, index_personalizado])
+        .mount("/api/v1", routes![api_frases])
         .attach(Template::fairing())
         .launch();
 }
